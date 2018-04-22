@@ -33,12 +33,12 @@ Example:
 `curl -X POST http://localhost:8080/new/www.google.com`   
 
 ### Check Status:
-`curl -X POST http://localhost:8080/status/id`
+`curl -X GET http://localhost:8080/status/id`
 
 replace `ID` with task ID returned from `/new`.
 
 Example:  
-`curl -X POST http://localhost:8080/status/1`   
+`curl -X GET http://localhost:8080/status/1`   
 
 ## File structure
 
