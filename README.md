@@ -2,9 +2,10 @@
 
 ## Dependencies
 
-PostGreSQL
 Python3
 Flask
+PostGreSQL
+SQLAlchemy
 Redis
 
 ## Getting Started
@@ -16,6 +17,7 @@ Redis
     $ python server.py init
 
 Re-run server after first init:
+
     $ python server.py
 
 Servers runs on: http://localhost:8080/
@@ -29,7 +31,6 @@ replace `URL` with the site you wish to scrape
 
 Example:  
 `curl -X POST http://localhost:8080/add_job/www.google.com`   
-returns task ID
 
 ### Check Status:
 `curl -X POST http://localhost:8080/status/id`
@@ -44,4 +45,5 @@ Example:
     .
     ├── server.py                # Flask RESTful web API
     ├── model.py          	 	 # Database model
-    └── ????           # Test webhooks data
+    └── helpers.py           	 # Worker functions
+    
