@@ -1,73 +1,48 @@
-from flask import Flask, request, json
+from flask import Flask, request
+import multiprocessing
+from helpers import process_job 
+import redis
+from model import connect_to_db, db 
 
 # ------------------------------------------------- #
 
 app = Flask(__name__)
+# creates incrementer for job IDs
+r = redis.StrictRedis()
+r.set('curr_id', 0)
 
-@app.route("/", methods=['POST'])
-def status_timer():
-	"""Takes in state changes data of a test run 
-		and returns time spent on each state.
-		>>> time_states('test-runs.json')
-		{ "pending_seconds": 1,
-		  "creating_seconds": 3,
-		  "building_seconds": 10,
-		  "running_seconds": 20
-		}
-	"""
+# If there is work in the queue, do it (on app start)
+p = multiprocessing.Process(target=process_job)
+p.start()
 
-	if request.headers['Content-Type'] != 'application/json':
-		return 'Error, please pass webhooks data as json'
+@app.route("/add_job", methods=['POST'])
+def add_task():
+    """add job to the queue, initiate web scraping process"""
+    # user passes URL to route
+    url = request.args.get('url')
+    # I chose to use redis, so the queue could be accessed by helper functions,
+    # since Flask is stateless across processes
+    r = redis.StrictRedis()
+    # increment job id counter
+    job_id = r.incr('curr_id')
+    # add new job to queue
+    r.hset('urls', job_id, url)
+    r.hset('status', job_id, 'processing')
+    r.rpush('job_queue', job_id)
 
-	# the parser returns a list of tuples where:
-	# tuple[0] = status, tuple[1] = start time, tuple[2] = end time
-	data = parse_webhooks(request.json)
-	# I decided to make the dictionary separately instead of 
-	# within the for loop to maintain the desired order
-	state_times = {
-				  'pending_seconds': 0,
-				  'creating_seconds': 0,
-				  'building_seconds': 0,
-				  'running_seconds': 0
-				  }
+    return 'job ID:{}'.format(job_id)
 
-	# loop through each tuple
-	for d in data:
-		# d[0] is the status message
-		status = d[0]
-		# convert to integer to match formatting of sample answer
-		time = int((convert_UTC(d[2]) - convert_UTC(d[1])).total_seconds())
-		# aggregate time spent in each testing stage
-		if status == 'pending':
-			state_times['pending_seconds'] += time
-		elif status == 'creating':
-			state_times['creating_seconds'] += time
-		elif status == 'building':
-			state_times['building_seconds'] += time
-		elif status == 'running':
-			state_times['running_seconds'] += time
-		else:
-			return 'error, status not found'
-
-	# I couldn't figure out how to get the output to pretty print as an ordered dictionary
-	# According to Google, there's a Python bug that has trouble pretty printing ordered dictionaries
-	# The docs says the following should do it, but a) it doesn't and b) it intuitively shouldn't... since json renders unordered.
-
-	# return json.dumps(OrderedDict(state_times), indent=4)
-
-	# the best I can do now is print in console
-	print(json.dumps(state_times, indent=4))
-	state_times = str(state_times)
-	json_time = json.dumps(state_times)
-	# returns json on one line, not pretty printed
-	return json.loads(json_time)
-
-	# After spending 1 hour on trying to pretty print, I decided 'done is better than perfect.'
-	# I tried pprint, adding the indent option to json.dumps(), scoured the docs and couldn't figure it out
-	# I tried jsonify, OrderedDict... it seems to be a pretty-printed and out of order, or pretty-printed and in order tradeoff
-	# It seems like a simple syntax thing or a module I just haven't seen, so please teach me.
-
-
+@app.route("/check_id")
+def check_job():
+    """check job status, if done, return page source"""
+    job_id = request.args.get('id')
+    # if job is complete, return html
+    if r.hget('status', job_id) == 'complete':
+        return Sites.query.get(job_id).html
+    # else return processing message
+    return 'Processing'
 # ------------------------------------------------- #
 
-app.run(port=8080)
+if __name__ == "__main__":
+    connect_to_db(app)
+    app.run(port=8080)
