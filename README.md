@@ -2,11 +2,11 @@
 
 ## Dependencies
 
-Python3
-Flask
-PostGreSQL
-SQLAlchemy
-Redis
+Python3  
+Flask  
+PostGreSQL  
+SQLAlchemy  
+Redis  
 
 ## Getting Started
 
@@ -25,17 +25,17 @@ Servers runs on: http://localhost:8080/
 ## Usage
 
 ### Add Task:
-`curl -X POST http://localhost:8080/add_job/URL`
+`curl -X POST http://localhost:8080/new/URL`
 
 replace `URL` with the site you wish to scrape
 
 Example:  
-`curl -X POST http://localhost:8080/add_job/www.google.com`   
+`curl -X POST http://localhost:8080/new/www.google.com`   
 
 ### Check Status:
 `curl -X POST http://localhost:8080/status/id`
 
-replace `ID` with task ID.
+replace `ID` with task ID returned from `/new`.
 
 Example:  
 `curl -X POST http://localhost:8080/status/1`   
@@ -43,7 +43,6 @@ Example:
 ## File structure
 
     .
-    ├── server.py                # Flask RESTful web API
+    ├── server.py 				 # Flask RESTful web API
     ├── model.py          	 	 # Database model
     └── helpers.py           	 # Worker functions
-    

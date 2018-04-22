@@ -15,7 +15,7 @@ r.set('curr_id', 0)
 
 # based on the example, I'm going to assume the user must submit
 # the url as 'www.site.com' without protocol headers, 
-@app.route("/add_job/<site>", methods=['POST'])
+@app.route("/new/<site>", methods=['POST'])
 def add_task(site):
     """add job to the queue, initiate web scraping process"""
 
