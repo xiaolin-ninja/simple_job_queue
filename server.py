@@ -2,7 +2,8 @@ from flask import Flask, request
 import multiprocessing
 from helpers import process_job 
 import redis
-from model import connect_to_db, db 
+from model import Site, connect_to_db, db 
+import sys
 
 # ------------------------------------------------- #
 
@@ -12,37 +13,47 @@ r = redis.StrictRedis()
 r.set('curr_id', 0)
 
 # If there is work in the queue, do it (on app start)
-p = multiprocessing.Process(target=process_job)
-p.start()
 
-@app.route("/add_job", methods=['POST'])
-def add_task():
+# based on the example, I'm going to assume the user must submit
+# the url as 'www.site.com' without the http:// header
+@app.route("/add_job/<site>", methods=['POST'])
+def add_task(site):
     """add job to the queue, initiate web scraping process"""
     # user passes URL to route
-    url = request.args.get('url')
+    print('user input:', site)
     # I chose to use redis, so the queue could be accessed by helper functions,
     # since Flask is stateless across processes
     r = redis.StrictRedis()
     # increment job id counter
     job_id = r.incr('curr_id')
-    # add new job to queue
+    # add http header
+    url = 'http://' + site
     r.hset('urls', job_id, url)
+    # add new job to queue
     r.hset('status', job_id, 'processing')
     r.rpush('job_queue', job_id)
 
+    p = multiprocessing.Process(target=process_job)
+    p.start()
+
     return 'job ID:{}'.format(job_id)
 
-@app.route("/check_id")
-def check_job():
+@app.route("/status/<job_id>")
+def check_job(job_id):
     """check job status, if done, return page source"""
-    job_id = request.args.get('id')
     # if job is complete, return html
-    if r.hget('status', job_id) == 'complete':
-        return Sites.query.get(job_id).html
+    print('job_id:', job_id)
+    print('status:', r.hget('status', job_id))
+    if r.hget('status', job_id).decode("utf-8") == 'complete':
+        url = r.hget('urls', job_id).decode("utf-8")
+        print('URL:', url)
+        return Site.query.filter_by(url=url).first().html
     # else return processing message
     return 'Processing'
 # ------------------------------------------------- #
 
 if __name__ == "__main__":
     connect_to_db(app)
+    if len(sys.argv) >1:
+        db.create_all()
     app.run(port=8080)

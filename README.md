@@ -12,8 +12,10 @@ Redis
     $ virtualenv env
     $ source env/bin/activate
     $ pip install -r requirements.txt
-    $ createdb jobs
-    $ python model.py
+    $ createdb sites
+    $ python server.py init
+
+Re-run server after first init:
     $ python server.py
 
 Servers runs on: http://localhost:8080/
@@ -21,21 +23,21 @@ Servers runs on: http://localhost:8080/
 ## Usage
 
 ### Add Task:
-`curl -X POST http://localhost:8080/add_job -d url=URL`
+`curl -X POST http://localhost:8080/add_job/URL`
 
 replace `URL` with the site you wish to scrape
 
 Example:  
-`curl -X POST http://localhost:8080/add_job -d url=www.google.com`   
+`curl -X POST http://localhost:8080/add_job/www.google.com`   
 returns task ID
 
 ### Check Status:
-`curl -X POST http://localhost:8080/status -d id=ID`
+`curl -X POST http://localhost:8080/status/id`
 
 replace `ID` with task ID.
 
 Example:  
-`curl -X POST http://localhost:8080/add_job -d id=1`   
+`curl -X POST http://localhost:8080/status/1`   
 
 ## File structure
 
