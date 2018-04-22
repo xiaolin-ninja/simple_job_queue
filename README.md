@@ -1,4 +1,4 @@
-# Web Scraper Task Manager
+# Web Scraper Job Queue
 
 ## Dependencies
 
