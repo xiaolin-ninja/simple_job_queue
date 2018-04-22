@@ -43,6 +43,6 @@ Example:
 ## File structure
 
     .
-    ├── server.py 				 # Flask RESTful web API
+    ├── server.py 			# Flask RESTful web API
     ├── model.py          	 	 # Database model
     └── helpers.py           	 # Worker functions
