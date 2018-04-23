@@ -30,7 +30,9 @@ Servers runs on: http://localhost:8080/
 replace `URL` with the site you wish to scrape
 
 Example:  
-`curl -X POST http://localhost:8080/new/www.google.com`   
+`curl -X POST http://localhost:8080/new/www.google.com`  
+
+Please only enter sites in the `'www.domain.tld'` format.
 
 ### Check Status:
 `curl -X GET http://localhost:8080/status/id`
