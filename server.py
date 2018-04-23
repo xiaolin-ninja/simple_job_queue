@@ -56,7 +56,7 @@ if __name__ == "__main__":
     if len(sys.argv) >1:
         db.create_all()
     for x in range(10):
-        # start processing job in the background
+        # start 10 workers in the background
         p = multiprocessing.Process(target=process_job)
         p.start()
     app.run(port=8080)
