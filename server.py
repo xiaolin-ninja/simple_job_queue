@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import multiprocessing
 from helpers import process_job 
 import redis
@@ -38,7 +38,7 @@ def add_task(site):
     p.start()
 
     # returns job ID to user
-    return 'job ID:{}'.format(job_id)
+    return jsonify({'job ID' : job_id})
 
 @app.route("/status/<job_id>")
 def check_job(job_id):
