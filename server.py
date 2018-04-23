@@ -29,13 +29,9 @@ def add_task(site):
     # redis hash to keep track of jobs
     r.hset('urls', job_id, url)
     # redis hash to keep track of job statuses
-    r.hset('status', job_id, 'processing')
+    r.hset('status', job_id, 'pending')
     # redis list job queue
     r.rpush('job_queue', job_id)
-
-    # start processing job in the background
-    p = multiprocessing.Process(target=process_job)
-    p.start()
 
     # returns job ID to user
     return jsonify({'job ID' : job_id})
@@ -59,4 +55,8 @@ if __name__ == "__main__":
     connect_to_db(app)
     if len(sys.argv) >1:
         db.create_all()
+    for x in range(10):
+        # start processing job in the background
+        p = multiprocessing.Process(target=process_job)
+        p.start()
     app.run(port=8080)
