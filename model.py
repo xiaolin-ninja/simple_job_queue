@@ -5,7 +5,7 @@ db = SQLAlchemy()
 # ----------------------------------------------------- #
 
 class Site(db.Model):
-    """Web Scraping Task"""
+    """Scraped Sites Cache"""
 
     __tablename__ = "sites"
 
@@ -22,7 +22,7 @@ class Site(db.Model):
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
-    # Configure to use our PstgreSQL database
+    # Configure to use our PostgreSQL database
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///sites"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
