@@ -1,4 +1,4 @@
-ffrom flask import Flask, request, jsonify
+from flask import Flask, request, jsonify
 import multiprocessing
 from helpers import process_job 
 import redis
