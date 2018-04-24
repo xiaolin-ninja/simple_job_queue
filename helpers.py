@@ -21,6 +21,7 @@ def process_job():
         # if this url has not been requested before/is not in the db
         if Site.query.filter_by(url=url).first():
             r.hset('status', curr_job, 'complete')
+            print('Job', curr_job, 'Completed')
         else:
             # fetches url page source
             try:
@@ -31,25 +32,25 @@ def process_job():
                 db.session.commit()
                 print('Added to database')
                 r.hset('status', curr_job, 'complete')
+                print('Job', curr_job, 'Completed')
             except ValueError:
                 r.hset('status', curr_job, 'abort')
+                print('Job', curr_job, 'Aborted')
             except TimeoutError:
                 r.hset('status', curr_job, 'timeout')
-        # update job status
-        print('Job', curr_job, 'Completed')
+                print('Job', curr_job, 'Timed Out')
+    return
 
 def get_html(url):
     """Fetches html page source of url"""
     print('fetching', url)
     try:
-        r = requests.get(url, timeout=30, stream=True)
-        sizelimit = 1000000
-        html = ''
-        for chunk in r.iter_content(2048):
-            html += chunk
-            if len(html) > sizelimit:
-                r.close()
-                raise ValueError('response too large')
+        r = requests.get(url, timeout=1, stream=True)
+        print('success!')
+        # limit file size to 1mb
+        html = r.raw.read(1000000+1, decode_content=True)
+        if len(html) > 1000000:
+            raise ValueError('response too large')
         return html
     except:
         raise TimeoutError('request timed out')
