@@ -24,7 +24,7 @@ def process_job():
         else:
             # fetches url page source
             try:
-                html = get_html(url).decode("utf-8")
+                html = str(get_html(url))
                 print('Successfully retrieved HTML')
             # add results to database
                 db.session.add(Site(url=url, html=html))
@@ -43,10 +43,13 @@ def get_html(url):
     print('fetching', url)
     try:
         r = requests.get(url, timeout=30, stream=True)
-        html = r.raw.read(10000000+1, decode_content=True)
-        # limit file size to 10mb
-        if len(html) > 10000000:
-            raise ValueError('response too large')
+        sizelimit = 1000000
+        html = ''
+        for chunk in r.iter_content(2048):
+            html += chunk
+            if len(html) > sizelimit:
+                r.close()
+                raise ValueError('response too large')
         return html
     except:
         raise TimeoutError('request timed out')
