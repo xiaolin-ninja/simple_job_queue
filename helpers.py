@@ -45,10 +45,10 @@ def get_html(url):
     """Fetches html page source of url"""
     print('fetching', url)
     try:
-        r = requests.get(url, timeout=1, stream=True)
+        re = requests.get(url, timeout=1, stream=True)
         print('success!')
         # limit file size to 1mb
-        html = r.raw.read(1000000+1, decode_content=True)
+        html = re.raw.read(1000000+1, decode_content=True)
         if len(html) > 1000000:
             raise ValueError('response too large')
         return html
