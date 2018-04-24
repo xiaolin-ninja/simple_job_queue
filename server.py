@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+ffrom flask import Flask, request, jsonify
 import multiprocessing
 from helpers import process_job 
 import redis
@@ -41,6 +41,11 @@ def check_job(job_id):
     """check job status, if done, return page source"""
 
     # convert from byte to unicode
+    if r.hget('status', job_id).decode("utf-8") == 'timeout':
+        return 'Request timed out'
+    # for now we only abort because of large response
+    if r.hget('status', job_id).decode("utf-8") == 'abort':
+        return 'Response too large, limit 1MB'
     if r.hget('status', job_id).decode("utf-8") == 'complete':
         # if job status is done, retrieve url attached to job ID
         url = r.hget('urls', job_id).decode("utf-8")
