@@ -33,5 +33,8 @@ def process_job():
 
 def get_html(url):
 	"""Fetches html page source of url"""
-	html = urllib.request.urlopen(url).read()
+	try:
+	    html = urllib.request.urlopen(url, timeout=30).read()
+	except TimeoutError:
+	    return 'request timed out'
 	return html
