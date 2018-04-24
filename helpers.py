@@ -19,10 +19,12 @@ def process_job():
         print('Current URL:', url)
 
         # if this url has not been requested before/is not in the db
-        if not Site.query.filter_by(url=url).first():
+        if Site.query.filter_by(url=url).first():
+            r.hset('status', curr_job, 'complete')
+        else:
             # fetches url page source
             try:
-                html = str(get_html(url)).decode("utf-8")
+                html = get_html(url).decode("utf-8")
                 print('Successfully retrieved HTML')
             # add results to database
                 db.session.add(Site(url=url, html=html))
@@ -35,15 +37,17 @@ def process_job():
                 r.hset('status', curr_job, 'timeout')
         # update job status
         print('Job', curr_job, 'Completed')
-    return
 
 def get_html(url):
     """Fetches html page source of url"""
     print('fetching', url)
-    r = requests.get(url, timeout=1, stream=True)
-    # limit file size to 1mb
-    html = r.raw.read(1000000+1, decode_content=True)
-    if len(html) > 1000000:
-        raise ValueError('response too large')
-
-    return html
+    try:
+        r = requests.get(url, timeout=30, stream=True)
+        html = r.raw.read(10000000+1, decode_content=True)
+        # limit file size to 10mb
+        if len(html) > 10000000:
+            raise ValueError('response too large')
+        return html
+    except:
+        raise TimeoutError('request timed out')
+    
